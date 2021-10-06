@@ -1,2 +1,5 @@
 # cpsc449-project02
-Mockroblog Project
+Microblogging Project
+
+## Author
+Justin Blanco
