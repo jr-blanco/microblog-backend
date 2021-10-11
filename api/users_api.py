@@ -158,17 +158,6 @@ def search(request, db: sqlite, logger: log):
 def followers(db: sqlite):
   return {"following": db["following"].rows}
 
-
-@hug.get("/following/{username}")
-def retrive_follower(response, username: hug.types.text, db: sqlite):
-  followers = []
-  try:
-    following = db["following"].get(username)
-    following.append()
-  except sqlite_utils.db.NotFoundError:
-    response.status = hug.falcon.HTTP_404
-  return {"following": following}
-
 @hug.get(
   "/following/search",
   examples=[
