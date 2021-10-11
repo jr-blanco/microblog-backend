@@ -153,3 +153,46 @@ def search(request, db: sqlite, logger: log):
     return {"followers": followers.rows_where(where, values)}
   else:
     return {"followers": followers.rows}
+
+@hug.get("/following/")
+def followers(db: sqlite):
+  return {"following": db["following"].rows}
+
+
+@hug.get("/following/{username}")
+def retrive_follower(response, username: hug.types.text, db: sqlite):
+  followers = []
+  try:
+    following = db["following"].get(username)
+    following.append()
+  except sqlite_utils.db.NotFoundError:
+    response.status = hug.falcon.HTTP_404
+  return {"following": following}
+
+@hug.get(
+  "/following/search",
+  examples=[
+    "username=jbestwall2l",
+    "friendname=hleagast",
+  ],
+)
+def search(request, db: sqlite, logger: log):
+  following = db["following"]
+
+  conditions = []
+  values = []
+
+  if "username" in request.params:
+    conditions.append("username = ?")
+    values.append(request.params["username"])
+
+  if "friendname" in request.params:
+    conditions.append("friendname = ?")
+    values.append(request.params["friendname"])
+
+  if conditions:
+    where = "AND ".join(conditions)
+    logger.debug('WHERE "%s", %r', where, values)
+    return {"following": following.rows_where(where, values)}
+  else:
+    return {"following": following.rows}
