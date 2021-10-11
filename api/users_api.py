@@ -126,6 +126,18 @@ def retrive_follower(response, id: hug.types.number, db: sqlite):
     response.status = hug.falcon.HTTP_404
   return {"followers": followers}
 
+@hug.get("/users/{id}/followers/")
+def retrieve_followers(response, id: hug.types.number, db: sqlite):
+  followers = []
+  try:
+    db["users"].get(id)
+    for row in db["followers"].rows_where("follower_id = ?", [id]):
+      followers.append(row)
+  except sqlite_utils.db.NotFoundError:
+    response.status = hug.falcon.HTTP_404
+
+  return {"followers": followers}
+
 @hug.get(
   "/followers/search",
   examples=[
