@@ -62,19 +62,32 @@ def retrive_user(response, id: hug.types.number, db: sqlite):
     response.status = hug.falcon.HTTP_404
   return {"users": users}
 
-# @hug.get(
-#   "/search",
-#   examples=[
-#     "username=jblanco",
-#     "email=jrblanco@csu.fullerton.edu",
-#     "bio=living life",
-#   ],
-# )
-# def search(request, db: sqlite, logger: log):
-#   users = db["users"]
+@hug.get(
+  "/search",
+  examples=[
+    "username=jblanco",
+    "email=jrblanco@csu.fullerton.edu",
+    "bio=living life",
+  ],
+)
+def search(request, db: sqlite, logger: log):
+  users = db["users"]
 
-#   conditions = []
-#   values = []
+  conditions = []
+  values = []
 
-#   if "username" in request.params:
-#     conditions.append("username = ?")
+  if "username" in request.params:
+    conditions.append("username = ?")
+    values.append(request.params["username"])
+
+  for column in ["username", "email", "bio"]:
+    if column in request.params:
+      conditions.append(f"{column} LIKE ?")
+      values.append(f"%{request.params[column]}%")
+
+  if conditions:
+    where = "AND ".join(conditions)
+    logger.debug('WHERE "%s", %r', where, values)
+    return {"users": users.rows_where(where, values)}
+  else:
+    return {"users": users.rows}
