@@ -18,3 +18,8 @@ def sqlite(section="sqlite", key="dbfile", **kwargs):
 @hug.directive()
 def log(name=__name__, **kwargs):
   return logging.getLogger(name)
+
+# Routes
+@hug.get("/posts/")
+def user(db: sqlite):
+  return {"posts": db["posts"].rows}
