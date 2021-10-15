@@ -20,6 +20,8 @@ def log(name=__name__, **kwargs):
   return logging.getLogger(name)
 
 # Routes
-@hug.get("/posts/")
-def user(db: sqlite):
+json = hug.get(output=hug.output_format.pretty_json)
+
+@json.get("/posts/")
+def posts(db: sqlite):
   return {"posts": db["posts"].rows}

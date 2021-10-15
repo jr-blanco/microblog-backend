@@ -20,11 +20,13 @@ def log(name=__name__, **kwargs):
   return logging.getLogger(name)
 
 # Routes
-@hug.get("/users/")
+json = hug.get(output=hug.output_format.pretty_json)
+
+@json.get("/users/")
 def users(db: sqlite):
   return {"users": db["users"].rows}
 
-@hug.post("/users/", status=hug.falcon.HTTP_201)
+@json.post("/users/", status=hug.falcon.HTTP_201)
 def create_user(
   response,
   username: hug.types.text,
@@ -52,7 +54,7 @@ def create_user(
   response.set_header("Location", f"/users/{user['id']}")
   return user
 
-@hug.get("/users/{id}")
+@json.get("/users/{id}")
 def retrive_user(response, id: hug.types.number, db: sqlite):
   users = []
   try:
@@ -62,7 +64,7 @@ def retrive_user(response, id: hug.types.number, db: sqlite):
     response.status = hug.falcon.HTTP_404
   return {"users": users}
 
-@hug.get(
+@json.get(
   "/users/search",
   examples=[
     "username=jblanco",
@@ -88,11 +90,11 @@ def search(request, db: sqlite, logger: log):
   else:
     return {"users": users.rows}
 
-@hug.get("/followers/")
+@json.get("/followers/")
 def followers(db: sqlite):
   return {"followers": db["followers"].rows}
 
-@hug.post("/followers/", status=hug.falcon.HTTP_201)
+@json.post("/followers/", status=hug.falcon.HTTP_201)
 def create_follower(
   response,
   follower_id: hug.types.number,
@@ -116,7 +118,7 @@ def create_follower(
   response.set_header("Location", f"/followers/{follower['id']}")
   return follower
 
-@hug.get("/followers/{id}")
+@json.get("/followers/{id}")
 def retrive_follower(response, id: hug.types.number, db: sqlite):
   followers = []
   try:
@@ -126,7 +128,7 @@ def retrive_follower(response, id: hug.types.number, db: sqlite):
     response.status = hug.falcon.HTTP_404
   return {"followers": followers}
 
-@hug.get("/users/{id}/followers/")
+@json.get("/users/{id}/followers/")
 def retrieve_followers(response, id: hug.types.number, db: sqlite):
   followers = []
   try:
@@ -138,7 +140,7 @@ def retrieve_followers(response, id: hug.types.number, db: sqlite):
 
   return {"followers": followers}
 
-@hug.get(
+@json.get(
   "/followers/search",
   examples=[
     "follower_id=1",
@@ -166,11 +168,11 @@ def search(request, db: sqlite, logger: log):
   else:
     return {"followers": followers.rows}
 
-@hug.get("/following/")
+@json.get("/following/")
 def followers(db: sqlite):
   return {"following": db["following"].rows}
 
-@hug.get(
+@json.get(
   "/following/search",
   examples=[
     "username=jbestwall2l",
