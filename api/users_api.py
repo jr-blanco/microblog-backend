@@ -2,6 +2,7 @@ import configparser
 import logging.config
 
 import hug
+import requests
 import sqlite_utils
 
 # Load configuration
@@ -63,13 +64,14 @@ def retrive_user(response, id: hug.types.number, db: sqlite):
   except sqlite_utils.db.NotFoundError:
     response.status = hug.falcon.HTTP_404
   return {"users": users}
-
+  
 @json.get(
   "/users/search",
   examples=[
     "username=jblanco",
     "email=jrblanco@csu.fullerton.edu",
     "bio=living life",
+    "password=pass"
   ],
 )
 def search(request, db: sqlite, logger: log):
@@ -78,17 +80,28 @@ def search(request, db: sqlite, logger: log):
   conditions = []
   values = []
 
-  for column in ["username", "email", "bio"]:
-    if column in request.params:
-      conditions.append(f"{column} LIKE ?")
-      values.append(f"%{request.params[column]}%")
+  if "username" in request.params:
+    conditions.append("username = ?")
+    values.append(request.params["username"])
+
+  if "email" in request.params:
+    conditions.append("email = ?")
+    values.append(request.params["email"])
+
+  if "bio" in request.params:
+    conditions.append("bio LIKE ?")
+    values.append(f"%{request.params['bio']}%")
+
+  if "password" in request.params:
+    conditions.append("password = ?")
+    values.append(request.params['password'])
 
   if conditions:
     where = "AND ".join(conditions)
     logger.debug('WHERE "%s", %r', where, values)
     return {"users": users.rows_where(where, values)}
   else:
-    return {"users": users.rows}
+    return {"users": users}
 
 @json.get("/followers/")
 def followers(db: sqlite):

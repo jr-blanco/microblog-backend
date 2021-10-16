@@ -1,5 +1,8 @@
 import configparser
 import logging.config
+from hug import authentication
+import requests
+import json
 
 import hug
 import sqlite_utils
@@ -19,9 +22,19 @@ def sqlite(section="sqlite", key="dbfile", **kwargs):
 def log(name=__name__, **kwargs):
   return logging.getLogger(name)
 
-# Routes
-json = hug.get(output=hug.output_format.pretty_json)
 
-@json.get("/posts/")
-def posts(db: sqlite):
+# Basic user verification for HTTP Basic Access Authentication
+def user_verify(username, password):
+  if username and password:
+    r = requests.get(f"http://localhost:5000/users/search?username={username}&password={password}")
+    data = r.json()['users']
+    if r.status_code == 200 and data:
+      return username
+  return False
+
+authentication = hug.authentication.basic(user_verify)
+
+# Routes
+@hug.get("/user/posts", requires=authentication)
+def posts(db: sqlite, user:hug.directives.user):
   return {"posts": db["posts"].rows}
