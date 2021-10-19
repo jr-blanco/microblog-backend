@@ -29,12 +29,37 @@ def user_verify(username, password):
     r = requests.get(f"http://localhost:5000/users/search?username={username}&password={password}")
     data = r.json()['users']
     if r.status_code == 200 and data:
+      print('\n\n', data, '\n\n')
       return username
   return False
 
 authentication = hug.authentication.basic(user_verify)
 
 # Routes
-@hug.get("/user/posts", requires=authentication)
-def posts(db: sqlite, user:hug.directives.user):
-  return {"posts": db["posts"].rows}
+#
+# Home timeline
+@hug.get("/timelines/home",
+  examples=[
+    "username=jblanco",
+  ],
+  requires=authentication,
+  output=hug.output_format.pretty_json,
+)
+def home_timeline(db: sqlite, user:hug.directives.user):
+  # get the users this user is following
+  r = requests.get(f"http://localhost:5000/following/search")
+  return {"posts": db["posts"].rows_where("")}
+
+# User timeline
+@hug.get("/timelines/posts/{username}",
+  output=hug.output_format.pretty_json
+)
+def user_timeline(db: sqlite, username: hug.types.text):
+  return {"posts": db["posts"].rows_where("username = ?", [f"{username}"], order_by="timestamp desc")}
+
+# Public Timeline
+@hug.get("/timelines/public",
+  output=hug.output_format.pretty_json
+)
+def public_timeline(db: sqlite):
+  return {"posts": db["posts"].rows_where(order_by="timestamp desc")}
