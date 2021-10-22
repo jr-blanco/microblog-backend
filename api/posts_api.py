@@ -44,10 +44,10 @@ authentication = hug.authentication.basic(user_verify)
   requires=authentication,
   output=hug.output_format.pretty_json,
 )
-def home_timeline(request, db: sqlite, user:hug.directives.user):
+def home_timeline(request, db: sqlite, user: hug.directives.user):
   # get the users this user is following
   posts = []
-  if "username" in request.params:
+  if "username" in request.params and request.params["username"] == user:
     r = requests.get(f"http://localhost:5000/following/{request.params['username']}")
     data = r.json()['following']
 
@@ -74,7 +74,7 @@ def public_timeline(db: sqlite):
   return {"posts": db["posts"].rows_where(order_by="timestamp desc")}
 
 # create a new post
-@hug.post("/posts/", status=hug.falcon.HTTP_201)
+@hug.post("/posts/", status=hug.falcon.HTTP_201, requires=authentication)
 def create_post(
   response,
   username: hug.types.text,
