@@ -23,10 +23,12 @@ def log(name=__name__, **kwargs):
 # Routes
 json = hug.get(output=hug.output_format.pretty_json)
 
+# gets all users
 @json.get("/users/")
 def users(db: sqlite):
   return {"users": db["users"].rows}
 
+# create a new user
 @json.post("/users/", status=hug.falcon.HTTP_201)
 def create_user(
   response,
@@ -55,6 +57,7 @@ def create_user(
   response.set_header("Location", f"/users/{user['id']}")
   return user
 
+# retrieve a specific user
 @json.get("/users/{id}")
 def retrive_user(response, id: hug.types.number, db: sqlite):
   users = []
@@ -64,7 +67,38 @@ def retrive_user(response, id: hug.types.number, db: sqlite):
   except sqlite_utils.db.NotFoundError:
     response.status = hug.falcon.HTTP_404
   return {"users": users}
-  
+
+# update a specific user
+@json.put("/users/{id}", status=hug.falcon.HTTP_204)
+def update_user(
+  response,
+  id: hug.types.number,
+  username: hug.types.text,
+  email: hug.types.text,
+  bio: hug.types.text,
+  password: hug.types.text,
+  db: sqlite,
+):
+  users = db["users"]
+
+  user = {
+    "username": username,
+    "email": email,
+    "bio": bio,
+    "password": password,
+  }
+
+  try:
+    users.get(id)
+    users.update(id, user)
+    user["id"] = users.last_pk
+  except sqlite_utils.db.NotFoundError:
+    response.status = hug.falcon.HTTP_404
+  except Exception as e:
+    response.status = hug.falcon.HTTP_409
+    return {"error": str(e)}
+
+# search for a user based off parameters
 @json.get(
   "/users/search",
   examples=[
@@ -103,10 +137,12 @@ def search(request, db: sqlite, logger: log):
   else:
     return {"users": users}
 
+# get a list of all followers
 @json.get("/followers/")
 def followers(db: sqlite):
   return {"followers": db["followers"].rows}
 
+# create a new follower
 @json.post("/followers/", status=hug.falcon.HTTP_201)
 def create_follower(
   response,
@@ -131,6 +167,7 @@ def create_follower(
   response.set_header("Location", f"/followers/{follower['id']}")
   return follower
 
+# get a specific follower by resource id
 @json.get("/followers/{id}")
 def retrive_follower(response, id: hug.types.number, db: sqlite):
   followers = []
@@ -141,18 +178,7 @@ def retrive_follower(response, id: hug.types.number, db: sqlite):
     response.status = hug.falcon.HTTP_404
   return {"followers": followers}
 
-@json.get("/users/{id}/followers/")
-def retrieve_followers(response, id: hug.types.number, db: sqlite):
-  followers = []
-  try:
-    db["users"].get(id)
-    for row in db["followers"].rows_where("follower_id = ?", [id]):
-      followers.append(row)
-  except sqlite_utils.db.NotFoundError:
-    response.status = hug.falcon.HTTP_404
-
-  return {"followers": followers}
-
+# search for follower ids based off parameters
 @json.get(
   "/followers/search",
   examples=[
@@ -185,30 +211,10 @@ def search(request, db: sqlite, logger: log):
 def followers(db: sqlite):
   return {"following": db["following"].rows}
 
+# get a list of a usernames a user is following
 @json.get(
-  "/following/search",
-  examples=[
-    "username=jbestwall2l",
-    "friendname=hleagast",
-  ],
+  "/following/{username}",
 )
-def search(request, db: sqlite, logger: log):
+def get_following(db: sqlite, username: hug.types.text):
   following = db["following"]
-
-  conditions = []
-  values = []
-
-  if "username" in request.params:
-    conditions.append("username = ?")
-    values.append(request.params["username"])
-
-  if "friendname" in request.params:
-    conditions.append("friendname = ?")
-    values.append(request.params["friendname"])
-
-  if conditions:
-    where = "AND ".join(conditions)
-    logger.debug('WHERE "%s", %r', where, values)
-    return {"following": following.rows_where(where, values)}
-  else:
-    return {"following": following.rows}
+  return {"following": following.rows_where("username = ?", [username])}

@@ -29,7 +29,6 @@ def user_verify(username, password):
     r = requests.get(f"http://localhost:5000/users/search?username={username}&password={password}")
     data = r.json()['users']
     if r.status_code == 200 and data:
-      print('\n\n', data, '\n\n')
       return username
   return False
 
@@ -45,17 +44,27 @@ authentication = hug.authentication.basic(user_verify)
   requires=authentication,
   output=hug.output_format.pretty_json,
 )
-def home_timeline(db: sqlite, user:hug.directives.user):
+def home_timeline(request, db: sqlite, user:hug.directives.user):
   # get the users this user is following
-  r = requests.get(f"http://localhost:5000/following/search")
-  return {"posts": db["posts"].rows_where("")}
+  posts = []
+  if "username" in request.params:
+    r = requests.get(f"http://localhost:5000/following/{request.params['username']}")
+    data = r.json()['following']
+
+    for follower in data:
+      posts.extend(list(db["posts"].rows_where("username = ?", [follower['friendname']])))
+    
+  return {"posts": posts}
+      
+      
+
 
 # User timeline
 @hug.get("/timelines/posts/{username}",
   output=hug.output_format.pretty_json
 )
 def user_timeline(db: sqlite, username: hug.types.text):
-  return {"posts": db["posts"].rows_where("username = ?", [f"{username}"], order_by="timestamp desc")}
+  return {"posts": db["posts"].rows_where("username = ?", [username], order_by="timestamp desc")}
 
 # Public Timeline
 @hug.get("/timelines/public",
