@@ -1,0 +1,2 @@
+formation: users_api=1,posts_api=3
+port: 5000

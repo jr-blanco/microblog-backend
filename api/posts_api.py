@@ -56,9 +56,6 @@ def home_timeline(request, db: sqlite, user: hug.directives.user):
     
   return {"posts": sorted(posts, key=lambda x: x['timestamp'], reverse=True)}
       
-      
-
-
 # User timeline
 @hug.get("/timelines/posts/{username}",
   output=hug.output_format.pretty_json
@@ -74,7 +71,7 @@ def public_timeline(db: sqlite):
   return {"posts": db["posts"].rows_where(order_by="timestamp desc")}
 
 # create a new post
-@hug.post("/posts/", status=hug.falcon.HTTP_201, requires=authentication)
+@hug.post("/timelines/posts/", status=hug.falcon.HTTP_201, requires=authentication)
 def create_post(
   response,
   username: hug.types.text,
