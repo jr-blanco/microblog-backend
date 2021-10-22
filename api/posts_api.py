@@ -52,9 +52,9 @@ def home_timeline(request, db: sqlite, user:hug.directives.user):
     data = r.json()['following']
 
     for follower in data:
-      posts.extend(list(db["posts"].rows_where("username = ?", [follower['friendname']])))
+      posts.extend(list(db["posts"].rows_where("username = ?", [follower['friendname']], limit=5)))
     
-  return {"posts": posts}
+  return {"posts": sorted(posts, key=lambda x: x['timestamp'], reverse=True)}
       
       
 
@@ -72,3 +72,28 @@ def user_timeline(db: sqlite, username: hug.types.text):
 )
 def public_timeline(db: sqlite):
   return {"posts": db["posts"].rows_where(order_by="timestamp desc")}
+
+# create a new post
+@hug.post("/posts/", status=hug.falcon.HTTP_201)
+def create_post(
+  response,
+  username: hug.types.text,
+  text: hug.types.text,
+  db: sqlite,
+):
+  posts = db["posts"]
+
+  post = {
+    "username": username,
+    "text": text,
+  }
+
+  try:
+    posts.insert(post)
+    post["id"] = posts.last_pk
+  except Exception as e:
+    response.status = hug.falcon.HTTP_409
+    return {"error": str(e)}
+
+  response.set_header("Location", f"/timelines/public/{post['id']}")
+  return post
