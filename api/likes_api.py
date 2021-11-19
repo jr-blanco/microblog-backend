@@ -27,22 +27,31 @@ def log(name=__name__, **kwargs):
 # Routes
 #
 # Get the number of likes of a post
-@hug.get("/likes/{id}")
-def get_likes(response, db: sqlite, id: hug.types.number):
+@hug.get("/likes/{post_id}")
+def get_likes(response, db: sqlite, post_id: hug.types.number):
   # get the users this user is following
-  # r = redis.Redis(host='localhost', port=6379, db=0)
-  if not r.exists(f"posts:{id}:likes"):
+  if not r.exists(f"posts:{post_id}:likes"):
     response.status = hug.falcon.HTTP_404
-  return {"likes": r.get(f"posts:{id}:likes")}
+  return {"likes": r.get(f"posts:{post_id}:likes")}
 
 # Like a post by a certain amount
-@hug.put("/likes/{id}", status=hug.falcon.HTTP_201)
+# TODO: check if user has already like post
+@hug.put("/likes/{post_id}", status=hug.falcon.HTTP_201)
 def add_likes(
   response, 
-  id: hug.types.number,
+  post_id: hug.types.number,
+  user_id: hug.types.number,
   amount: hug.types.number
   ):
-  # r = redis.Redis(host='localhost', port=6379, db=0)
-  r.incr(f'posts:{id}:likes', amount)
+  r.incr(f'posts:{post_id}:likes', amount)
+  r.rpush(f'likes:{user_id}:list', post_id)
 
-# list of users
+# list of users' likes
+@hug.get("/likes/users/{user_id}")
+def get_user_likes(
+  response,
+  user_id: hug.types.number
+):
+  if not r.exists(f"likes:{user_id}:list"):
+    response.status = hug.falcon.HTTP_404
+  return {"likes": r.lrange(f"likes:{user_id}:list", 0, -1)}
