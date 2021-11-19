@@ -44,7 +44,9 @@ def add_likes(
   amount: hug.types.number
   ):
   r.incr(f'posts:{post_id}:likes', amount)
-  r.rpush(f'likes:{user_id}:list', post_id)
+  r.rpush(f'users:{user_id}:likes', post_id)
+  num = r.get(f'posts:{post_id}:likes')
+  r.zadd('leaderboard', {post_id: num})
 
 # list of users' likes
 @hug.get("/likes/users/{user_id}")
@@ -52,6 +54,11 @@ def get_user_likes(
   response,
   user_id: hug.types.number
 ):
-  if not r.exists(f"likes:{user_id}:list"):
+  if not r.exists(f"users:{user_id}:likes"):
     response.status = hug.falcon.HTTP_404
   return {"likes": r.lrange(f"likes:{user_id}:list", 0, -1)}
+
+# return list of top 10 popular posts
+@hug.get("/likes/popular")
+def get_popular(response):
+  return {"likes": r.zrevrange('leaderboard', 0, 10)}
