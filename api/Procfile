@@ -1,2 +1,3 @@
 users_api: gunicorn --access-logfile - --capture-output users_api:__hug_wsgi__
 posts_api: gunicorn --access-logfile - --capture-output posts_api:__hug_wsgi__
+likes_api: gunicorn --access-logfile - --capture-output likes_api:__hug_wsgi__
