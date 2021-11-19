@@ -1,4 +1,4 @@
-# Project 02 - Microservice Implementation and Load Balancing
+# Project 03 - Microservice Implementation and Load Balancing
 
 ### Author
 Justin Blanco 887073658
