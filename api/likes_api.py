@@ -1,24 +1,19 @@
 import configparser
 import logging.config
-from hug import authentication
-import requests
-import json
 import redis
 
 import hug
-import sqlite_utils
+
 
 # Load configuration
 config = configparser.ConfigParser()
-config.read("./etc/posts_api.ini")
+config.read("./etc/likes_api.ini")
 logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=False)
-r = redis.Redis(host='localhost', port=6379, db=0)
 
 # Arguements to inject into route functions
 @hug.directive()
-def sqlite(section="sqlite", key="dbfile", **kwargs):
-  dbfile = config[section][key]
-  return sqlite_utils.Database(dbfile)
+def _redis(section="redis", key="dbfile", **kwargs):
+  return redis.Redis(host='localhost', port=6379, db=0)
 
 @hug.directive()
 def log(name=__name__, **kwargs):
@@ -28,11 +23,11 @@ def log(name=__name__, **kwargs):
 #
 # Get the number of likes of a post
 @hug.get("/likes/{post_id}")
-def get_likes(response, db: sqlite, post_id: hug.types.number):
+def get_likes(response, db: _redis, post_id: hug.types.number):
   # get the users this user is following
-  if not r.exists(f"posts:{post_id}:likes"):
+  if not db.exists(f"posts:{post_id}:likes"):
     response.status = hug.falcon.HTTP_404
-  return {"likes": r.get(f"posts:{post_id}:likes")}
+  return {"likes": db.get(f"posts:{post_id}:likes")}
 
 # Like a post by a certain amount
 # TODO: check if user has already like post
@@ -41,24 +36,26 @@ def add_likes(
   response, 
   post_id: hug.types.number,
   user_id: hug.types.number,
-  amount: hug.types.number
+  amount: hug.types.number,
+  db: _redis
   ):
-  r.incr(f'posts:{post_id}:likes', amount)
-  r.rpush(f'users:{user_id}:likes', post_id)
-  num = r.get(f'posts:{post_id}:likes')
-  r.zadd('leaderboard', {post_id: num})
+  db.incr(f'posts:{post_id}:likes', amount)
+  db.rpush(f'users:{user_id}:likes', post_id)
+  num = db.get(f'posts:{post_id}:likes')
+  db.zadd('leaderboard', {post_id: num})
 
 # list of users' likes
 @hug.get("/likes/users/{user_id}")
 def get_user_likes(
   response,
-  user_id: hug.types.number
+  user_id: hug.types.number,
+  db: _redis
 ):
-  if not r.exists(f"users:{user_id}:likes"):
+  if not db.exists(f"users:{user_id}:likes"):
     response.status = hug.falcon.HTTP_404
-  return {"likes": r.lrange(f"likes:{user_id}:list", 0, -1)}
+  return {"likes": db.lrange(f"likes:{user_id}:list", 0, -1)}
 
 # return list of top 10 popular posts
 @hug.get("/likes/popular")
-def get_popular(response):
-  return {"likes": r.zrevrange('leaderboard', 0, 10)}
+def get_popular(response, db: _redis):
+  return {"likes": db.zrevrange('leaderboard', 0, 10)}
