@@ -12,8 +12,8 @@ logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=
 
 # Arguements to inject into route functions
 @hug.directive()
-def boto(url="http://localhost:8000", **kwargs):
-  return boto3.resource('dynamodb', endpoint_url=url)
+def boto(url="http://localhost:8000", table="Polls", **kwargs):
+  return boto3.resource('dynamodb', endpoint_url=url).Table(table)
 
 @hug.directive()
 def log(name=__name__, **kwargs):
@@ -21,3 +21,4 @@ def log(name=__name__, **kwargs):
 
 # Routes
 #
+@hug.get()
