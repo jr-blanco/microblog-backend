@@ -6,7 +6,7 @@ Justin Blanco 887073658
 ### Class/Section
 449-02
 
-## Project 2 Summary
+## Project 3 Summary
 This project implements two RESTful back-end services and prepares them for production deployment. Utilizes Python, sqlite_utils, requests library, and Hug Libraries. Deployed using foreman, gunicorn, and HAProxy.
 
 ## Starting Application
