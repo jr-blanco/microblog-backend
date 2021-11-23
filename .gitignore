@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Dynamo
+Dynamo/
+api/Dynamo/shared-local-instance.db
