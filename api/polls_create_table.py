@@ -19,7 +19,7 @@ def create_poll_table(dynamodb=None):
     AttributeDefinitions=[
       {
         'AttributeName': 'user',
-        'AttributeType': 'S'
+        'AttributeType': 'N'
       },
       {
         'AttributeName': 'question',
