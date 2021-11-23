@@ -1,7 +1,9 @@
 import configparser
 import logging.config
 import boto3
+from boto3.dynamodb.conditions import Key
 from pprint import pprint
+from falcon import response
 
 import hug
 
@@ -20,5 +22,14 @@ def log(name=__name__, **kwargs):
   return logging.getLogger(name)
 
 # Routes
-#
-@hug.get()
+# Returns the 
+@hug.get("/polls/users/{user_id}", output=hug.output_format.pretty_json)
+def get_user_polls(
+  response,
+  user_id: hug.types.number,
+  db: boto
+):
+  response = db.query(
+    KeyConditionExpression=Key('user').eq(user_id)
+  )
+  return response['Items']
