@@ -12,8 +12,8 @@ logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=
 
 # Arguements to inject into route functions
 @hug.directive()
-def _redis(section="redis", key="dbfile", **kwargs):
-  return redis.Redis(host='localhost', port=6379, db=0)
+def _redis(dbPort=6379, dbValue=0, **kwargs):
+  return redis.Redis(host='localhost', port=dbPort, db=dbValue)
 
 @hug.directive()
 def log(name=__name__, **kwargs):
