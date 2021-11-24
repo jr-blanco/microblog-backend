@@ -33,11 +33,15 @@ def update_poll(user, question, option, voter, dynamodb=None):
             'user': user,
             'question': question
         },
-        UpdateExpression=f"set info.scores[{option}] = info.scores[{option}] + :r, voters = list_append(voters, :v)",
-        ConditionExpression="",
+        UpdateExpression="set responses.#option.score = responses.#option.score + :r, responses.#option.voters.#voter = :v",
+        ConditionExpression="attribute_not_exists(responses.#option.voters.#voter)",
+        ExpressionAttributeNames={
+            '#option': option,
+            '#voter': str(voter)
+        },
         ExpressionAttributeValues={
             ':r': Decimal(1),
-            ':v': [voter]
+            ':v': Decimal(voter)
         },
         ReturnValues="UPDATED_NEW"
     )
@@ -45,7 +49,7 @@ def update_poll(user, question, option, voter, dynamodb=None):
 
 
 if __name__ == '__main__':
-    poll = update_poll(1, "Adipisicing ex nisi occaecat pariatur ex sint est sint.", 1, 2)
+    poll = update_poll(1, "Go real left international cut TV interview.", "protect", 2)
     if poll:
         print("Get poll succeeded:")
         pprint(poll, sort_dicts=False)

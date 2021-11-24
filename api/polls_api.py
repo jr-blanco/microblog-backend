@@ -3,6 +3,7 @@ import logging.config
 import boto3
 from boto3.dynamodb.conditions import Key
 from pprint import pprint
+from botocore.exceptions import ClientError
 from falcon import response
 from decimal import Decimal
 
@@ -72,20 +73,35 @@ def get_user_polls(
 def add_vote(
     response,
     user_id: hug.types.number,
-    post_user_id: hug.types.number,
     question: hug.types.text,
+    voter: hug.types.number,
     option: hug.types.number,
     db: boto
 ):
-    resp = db.update_item(
-        Key={
-            'user': user_id,
-            'question': question
-        },
-        UpdateExpression=f"set info.responses[{option}].votes = if_not_exists(info.responses[{option}].votes, info.responses[{option}].votes) + :v",
-        ExpressionAttributeValues={
-            ':v': Decimal(1)
-        },
-        ReturnValues="UPDATED_NEW"
-    )
-    return resp
+    try:
+        response = db.update_item(
+            Key={
+                'user': user_id,
+                'question': question
+            },
+            UpdateExpression="set responses.#option.score = responses.#option.score + :r, responses.#option.voters.#voter = :v",
+            ConditionExpression="attribute_not_exists(responses.#option.voters.#voter)",
+            ExpressionAttributeNames={
+                '#option': option,
+                '#voter': str(voter)
+            },
+            ExpressionAttributeValues={
+                ':r': Decimal(1),
+                ':v': Decimal(voter)
+            },
+            ReturnValues="UPDATED_NEW"
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] == "ConditionalCheckFailedException":
+            print(e.response['Error']['Message'])
+        else:
+            raise
+    else:
+        return response
+
+    return response
