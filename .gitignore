@@ -131,3 +131,4 @@ dmypy.json
 # Dynamo
 Dynamo/
 api/Dynamo/shared-local-instance.db
+.vscode/settings.json
