@@ -1,17 +1,19 @@
 from decimal import Decimal
 import json
 import boto3
+from lorem_text import lorem
 
 
 def load_polls(polls, dynamodb=None):
     if not dynamodb:
-        dynamodb = boto3.resource('dynamodb', endpoint_url="http://localhost:8000")
+        dynamodb = boto3.resource(
+            'dynamodb', endpoint_url="http://localhost:8000")
 
     table = dynamodb.Table('Polls')
     for poll in polls:
         user = int(poll['user'])
         question = poll['question']
-        print("Adding Poll:", user, question)
+        print('Adding poll:', user, question)
         table.put_item(Item=poll)
 
 
