@@ -75,17 +75,17 @@ def add_vote(
     user_id: hug.types.number,
     question: hug.types.text,
     voter: hug.types.number,
-    option: hug.types.number,
+    option: hug.types.text,
     db: boto
 ):
     try:
-        response = db.update_item(
+        resp = db.update_item(
             Key={
                 'user': user_id,
                 'question': question
             },
             UpdateExpression="set responses.#option.score = responses.#option.score + :r, responses.#option.voters.#voter = :v",
-            ConditionExpression="attribute_not_exists(responses.#option.voters.#voter)",
+            ConditionExpression="attribute_not_exists(responses.voters.#voter)",
             ExpressionAttributeNames={
                 '#option': option,
                 '#voter': str(voter)
@@ -98,10 +98,8 @@ def add_vote(
         )
     except ClientError as e:
         if e.response['Error']['Code'] == "ConditionalCheckFailedException":
-            print(e.response['Error']['Message'])
+            return {"error": "User already voted"}
         else:
             raise
     else:
-        return response
-
-    return response
+        return resp

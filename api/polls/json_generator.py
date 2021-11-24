@@ -26,10 +26,10 @@ def json_file_generator(num):
         data['user'] = i
         data['question'] = fake.sentence()
         temp = {}
+        temp['voters'] = {}
         for j in range(random.randint(2, 4)):
             temp[fake.word()] = {
-                'score': 0,
-                'voters': {}
+                'score': 0
             }
         data['responses'] = temp
         write_json(data)
