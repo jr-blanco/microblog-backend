@@ -2,10 +2,6 @@ import greenstalk
 import json
 import sqlite_utils
 
-def create_new_post(db, data):
-  print()
-
-
 # Connect and consume jobs
 client = greenstalk.Client(('127.0.0.1', 11300))
 db = sqlite_utils.Database("./var/timelines.db")
