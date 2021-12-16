@@ -3,7 +3,7 @@ import logging.config
 from hug import authentication
 import requests
 import json
-
+import greenstalk
 import hug
 import sqlite_utils
 
@@ -17,6 +17,10 @@ logging.config.fileConfig(config["logging"]["config"], disable_existing_loggers=
 def sqlite(section="sqlite", key="dbfile", **kwargs):
   dbfile = config[section][key]
   return sqlite_utils.Database(dbfile)
+
+@hug.directive()
+def greenstalkjob(url="http://localhost", port=11300):
+  return greenstalk.Client((url, port))
 
 @hug.directive()
 def log(name=__name__, **kwargs):
@@ -94,3 +98,17 @@ def create_post(
 
   response.set_header("Location", f"/timelines/public/{post['id']}")
   return post
+
+# insert a new job
+@hug.post("/timelines/posts/jobs", status=hug.falcon.HTTP_202)
+def insert_job(
+  response,
+  username: hug.types.text,
+  text: hug.types.text,
+  jobs: greenstalkjob,
+):
+  body = json.dumps({
+    'username': username,
+    'text': text,
+  })
+  jobs.put(body)

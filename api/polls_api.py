@@ -103,3 +103,19 @@ def add_vote(
             raise
     else:
         return resp
+
+# @hug.post("/polls/", status=hug.falcon.HTTP_201)
+# def create_poll(
+#     response,
+#     user_id: hug.types.number,
+#     question: hug.types.text,
+#     responses: hug.types.multiple,
+#     db: boto
+# ):
+#     try:
+#         resp = db.put_item(
+#             Item={
+#                 'user': user_id,
+                
+#             }
+#         )
