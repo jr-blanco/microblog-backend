@@ -19,7 +19,7 @@ def sqlite(section="sqlite", key="dbfile", **kwargs):
   return sqlite_utils.Database(dbfile)
 
 @hug.directive()
-def greenstalkjob(url='127.0.0.1', port=11300):
+def greenstalkjob(url='127.0.0.1', port=11300, **kwargs):
   return greenstalk.Client((url, port))
 
 @hug.directive()
