@@ -2,3 +2,4 @@ users_api: gunicorn --access-logfile - --capture-output users_api:__hug_wsgi__
 posts_api: gunicorn --access-logfile - --capture-output posts_api:__hug_wsgi__
 likes_api: gunicorn --access-logfile - --capture-output likes_api:__hug_wsgi__
 polls_api: gunicorn --access-logfile - --capture-output polls_api:__hug_wsgi__
+posts_job: python3 consume.py
