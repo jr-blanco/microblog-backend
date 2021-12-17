@@ -4,6 +4,8 @@ import sqlite_utils
 
 # Connect and consume jobs
 client = greenstalk.Client(('127.0.0.1', 11300))
+print("Using tube: ", client.using())
+print("Watching tube: ", client.watching())
 db = sqlite_utils.Database("./var/timelines.db")
 posts = db["posts"]
 
