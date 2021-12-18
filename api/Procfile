@@ -2,8 +2,8 @@ users_api: gunicorn --access-logfile - --capture-output users_api:__hug_wsgi__
 posts_api: gunicorn --access-logfile - --capture-output posts_api:__hug_wsgi__
 likes_api: gunicorn --access-logfile - --capture-output likes_api:__hug_wsgi__
 polls_api: gunicorn --access-logfile - --capture-output polls_api:__hug_wsgi__
+debug_email: python3 -m smtpd -n -c DebuggingServer localhost:1025
 posts_job: python3 posts_consumer.py
 likes_job: python3 likes_consumer.py
 polls_job: python3 polls_consumer.py
 email_job: python3 send_email.py
-debug_email: python3 -m smtpd -n -c DebuggingServer localhost:1025
