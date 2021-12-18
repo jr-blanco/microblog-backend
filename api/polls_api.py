@@ -66,6 +66,19 @@ def get_user_polls(
     )
     return response['Items']
 
+@hug.get("/polls/questions/{question}", output=hug.output_format.pretty_json)
+def get_question(
+    response,
+    question: hug.types.text,
+    db: boto
+):
+    print('\n\n\n', question, '\n\n\n\n')
+    response = db.query(
+        IndexName="QuestionIndex",
+        KeyConditionExpression=Key('question').eq(question)
+    )
+    return response['Items']
+
 # vote for on a user poll
 
 
