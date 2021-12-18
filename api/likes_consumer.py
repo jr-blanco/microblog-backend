@@ -1,8 +1,6 @@
 import greenstalk
 import json
 import redis
-from requests.api import post
-
 
 client = greenstalk.Client(('127.0.0.1', 11300), use='email', watch="likes")
 print("Using tube: ", client.using())
