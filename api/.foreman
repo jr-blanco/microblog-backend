@@ -1,2 +1,2 @@
-formation: users_api=1,posts_api=3, likes_api=1, polls_api=1, posts_job=1, likes_job=1
+formation: users_api=1,posts_api=3, likes_api=1, polls_api=1, posts_job=1, likes_job=1, polls_job=1
 port: 5000
