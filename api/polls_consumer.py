@@ -26,5 +26,5 @@ while True:
       data['message'] = f"Invalid poll URL: {tree}\nPost was deleted!"
       sqlJob.put(json.dumps(data))
       break
-  
+  client.delete(job)
     
