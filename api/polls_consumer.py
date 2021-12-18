@@ -23,6 +23,7 @@ while True:
         KeyConditionExpression=Key('question').eq(question)
     )
     if len(response['Items']) != 1:
+      data['message'] = f"Invalid poll URL: {tree}\nPost was deleted!"
       sqlJob.put(json.dumps(data))
       break
   
