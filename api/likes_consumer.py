@@ -4,7 +4,7 @@ import redis
 from requests.api import post
 
 
-client = greenstalk.Client(('127.0.0.1', 11300), use='likes', watch="likes")
+client = greenstalk.Client(('127.0.0.1', 11300), use='email', watch="likes")
 print("Using tube: ", client.using())
 print("Watching tube: ", client.watching())
 db = redis.Redis(host='localhost', port=6379, db=0)
@@ -21,4 +21,7 @@ while True:
     db.rpush(f'users:{user_id}:likes', post_id)
     num = db.get(f'posts:{post_id}:likes')
     db.zadd('leaderboard', {post_id: num})
+  else:
+    data['message'] = f"Invalid like! {post_id} does not exist."
+    client.put(json.dumps(data))
   client.delete(job)
