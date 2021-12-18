@@ -2,25 +2,16 @@ import smtplib
 import greenstalk
 import json
 
-fromaddr = prompt("From: ")
-toaddrs  = prompt("To: ").split()
-print("Enter message, end with ^D (Unix) or ^Z (Windows):")
-
-# Add the From: and To: headers at the start!
-msg = ("From: %s\r\nTo: %s\r\n\r\n"
-       % (fromaddr, ", ".join(toaddrs)))
-while True:
-    try:
-        line = input()
-    except EOFError:
-        break
-    if not line:
-        break
-    msg = msg + line
-
-print("Message length is", len(msg))
-
+# connections
+client = greenstalk.Client(('127.0.0.1', 11300), watch='email')
 server = smtplib.SMTP('localhost')
 server.set_debuglevel(1)
-server.sendmail(fromaddr, toaddrs, msg)
-server.quit()
+
+# Constants
+FROM = 'company@company.com'
+
+while True:
+  job = client.reserve()
+  data = json.load(job.body)
+  server.sendmail(FROM, data['username'], data['message'])
+
