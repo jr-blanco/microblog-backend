@@ -112,4 +112,3 @@ def insert_job(
     'text': text,
   })
   jobs.put(body)
-  return
