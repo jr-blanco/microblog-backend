@@ -1,12 +1,12 @@
 # Microblog Backend
 
 ### Author
-Justin Blanco 887073658
+Justin Blanco
 
 ### Class/Section
 449-02
 
-## Project 4 Summary
+## Project Summary
 Adds asynchronous messaging to the projects 2&3. Uses the greenstalk library for accessing the beanstalk work queue.
 Performance tested using hey and uses python's debugging server for SMTP.
 
