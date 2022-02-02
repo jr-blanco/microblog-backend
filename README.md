@@ -7,7 +7,7 @@ Justin Blanco
 449-02
 
 ## Project Summary
-This project implements two RESTful back-end services and prepares them for production deployment. Utilizes Python, sqlite_utils, requests library, and Hug Libraries. Deployed using foreman, gunicorn, and HAProxy. Implements asynchronous messaging using the greenstalk library for accessing the beanstalk work queue.
+Class project that implements four Python based RESTful back-end services and prepares them for production deployment using Hug API, Gunicorn and HAProxy. Microservices utilized the following libraries: sqlite, redis-py, boto3, and greenstalk.
 Performance tested using hey and uses python's debugging server for SMTP.
 
 ## Starting Application
